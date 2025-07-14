@@ -5,10 +5,9 @@ import {
   input,
   viewChild,
 } from '@angular/core';
+
 import { Navigation, Pagination } from 'swiper/modules';
-
 import Swiper from 'swiper';
-
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -26,8 +25,8 @@ import { ProductImagePipe } from '@products/pipes/product-image.pipe';
   `,
 })
 export class ProductCarouselComponent implements AfterViewInit {
-  images = input.required<string[]>();
-  swiperDiv = viewChild.required<ElementRef>('swiperDiv');
+  public images = input.required<string[]>();
+  private swiperDiv = viewChild.required<ElementRef>('swiperDiv');
 
   ngAfterViewInit(): void {
     const element = this.swiperDiv().nativeElement;
