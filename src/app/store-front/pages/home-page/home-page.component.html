@@ -1,4 +1,6 @@
-<h1 class="text-3xl font-bold font-montserrat">Todos los productos</h1>
+<h1 class="text-3xl font-bold font-montserrat">
+  Todos los productos {{ paginationService.currentPage() }}
+</h1>
 <h2 class="text-xl mb-5">Para todos los gustos</h2>
 
 <div
@@ -12,3 +14,8 @@
   <p>No hay productos</p>
   }
 </div>
+
+<app-pagination
+  [pages]="productsResource.value()?.pages ?? 0"
+  [currentPage]="paginationService.currentPage()"
+/>
