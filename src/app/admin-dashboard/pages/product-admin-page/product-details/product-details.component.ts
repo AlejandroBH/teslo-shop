@@ -1,17 +1,24 @@
+import { ProductsService } from '@products/services/products.service';
 import { Component, inject, input, OnInit } from '@angular/core';
 import { Product } from '@products/interfaces/product.interface';
 import { ProductCarouselComponent } from '@products/components/product-carousel/product-carousel.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormUtils } from '@utils/forms-utils';
+import { FormErrorLabelComponent } from '@shared/components/form-error-label/form-error-label.component';
 
 @Component({
   selector: 'product-details',
-  imports: [ProductCarouselComponent, ReactiveFormsModule],
+  imports: [
+    ProductCarouselComponent,
+    ReactiveFormsModule,
+    FormErrorLabelComponent,
+  ],
   templateUrl: './product-details.component.html',
 })
 export class ProductDetailsComponent implements OnInit {
   public product = input.required<Product>();
   private fb = inject(FormBuilder);
+  private productsService = inject(ProductsService);
 
   public productForm = this.fb.group({
     title: ['', Validators.required],
@@ -43,7 +50,38 @@ export class ProductDetailsComponent implements OnInit {
     // this.productForm.patchValue(formLike as any);
   }
 
+  public onSizeClicked(size: string) {
+    const currentSizes = this.productForm.value.sizes ?? [];
+
+    if (currentSizes.includes(size)) {
+      currentSizes.splice(currentSizes.indexOf(size), 1);
+    } else {
+      currentSizes.push(size);
+    }
+
+    this.productForm.patchValue({ sizes: currentSizes });
+  }
+
   public onSubmit() {
-    console.log(this.productForm.value);
+    const isValid = this.productForm.valid;
+    this.productForm.markAllAsTouched();
+
+    if (!isValid) return;
+    const formValue = this.productForm.value;
+
+    const productLike: Partial<Product> = {
+      ...(formValue as any),
+      tags:
+        formValue.tags
+          ?.toLowerCase()
+          .split(',')
+          .map((tag) => tag.trim()) ?? [],
+    };
+
+    this.productsService
+      .updateProduct(this.product().id, productLike)
+      .subscribe((product) => {
+        console.log('Product updated:', product);
+      });
   }
 }
