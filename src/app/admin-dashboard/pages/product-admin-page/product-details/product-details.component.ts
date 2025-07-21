@@ -1,5 +1,12 @@
 import { ProductsService } from '@products/services/products.service';
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -29,6 +36,14 @@ export class ProductDetailsComponent implements OnInit {
 
   public imageFileList: FileList | undefined = undefined;
   public tempImages = signal<string[]>([]);
+
+  public imagesToCarousel = computed(() => {
+    const currentProductImages = [
+      ...this.product().images,
+      ...this.tempImages(),
+    ];
+    return currentProductImages;
+  });
 
   public productForm = this.fb.group({
     title: ['', Validators.required],
