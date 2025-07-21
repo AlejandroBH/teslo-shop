@@ -18,11 +18,11 @@ export class AuthService {
 
   private http = inject(HttpClient);
 
-  checkStatusResource = rxResource({
+  public checkStatusResource = rxResource({
     loader: () => this.checkStatus(),
   });
 
-  authStatus = computed<AuthStatus>(() => {
+  public authStatus = computed<AuthStatus>(() => {
     if (this._authStatus() === 'checking') return 'checking';
 
     if (this._user()) {
@@ -32,11 +32,13 @@ export class AuthService {
     return 'not-authenticated';
   });
 
-  user = computed<User | null>(() => this._user());
-  token = computed<string | null>(this._token);
-  isAdmin = computed(() => this._user()?.roles.includes('admin') ?? false);
+  public user = computed<User | null>(() => this._user());
+  public token = computed<string | null>(this._token);
+  public isAdmin = computed(
+    () => this._user()?.roles.includes('admin') ?? false
+  );
 
-  login(email: string, password: string): Observable<boolean> {
+  public login(email: string, password: string): Observable<boolean> {
     return this.http
       .post<AuthResponse>(`${baseUrl}/auth/login`, {
         email: email,
@@ -48,7 +50,7 @@ export class AuthService {
       );
   }
 
-  register(
+  public register(
     fullName: string,
     email: string,
     password: string
@@ -65,7 +67,7 @@ export class AuthService {
       );
   }
 
-  checkStatus(): Observable<boolean> {
+  public checkStatus(): Observable<boolean> {
     const token = localStorage.getItem('token');
     if (!token) {
       this.logout();
@@ -84,7 +86,7 @@ export class AuthService {
       );
   }
 
-  logout() {
+  public logout() {
     this._user.set(null);
     this._token.set(null);
     this._authStatus.set('not-authenticated');
