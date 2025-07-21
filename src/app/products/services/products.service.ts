@@ -3,10 +3,12 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, of, tap } from 'rxjs';
 
 import {
+  Gender,
   Product,
   ProductsResponse,
 } from '@products/interfaces/product.interface';
 import { environment } from 'src/environments/environment';
+import { User } from '@auth/interfaces/user.interface';
 
 const baseUrl = environment.baseUrl;
 
@@ -15,6 +17,20 @@ interface Options {
   offset?: number;
   gender?: string;
 }
+
+const emptyProduct: Product = {
+  id: 'new',
+  title: '',
+  price: 0,
+  description: '',
+  slug: '',
+  stock: 0,
+  sizes: [],
+  gender: Gender.Men,
+  tags: [],
+  images: [],
+  user: {} as User,
+};
 
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
@@ -56,6 +72,10 @@ export class ProductsService {
   }
 
   public getProductById(id: string): Observable<Product> {
+    if (id === 'new') {
+      return of(emptyProduct);
+    }
+
     if (this.productCache.has(id)) {
       return of(this.productCache.get(id)!);
     }
@@ -74,6 +94,12 @@ export class ProductsService {
       .pipe(tap((product) => this.updateProductCache(product)));
   }
 
+  public createProduct(productLike: Partial<Product>): Observable<Product> {
+    return this.http
+      .post<Product>(`${baseUrl}/products`, productLike)
+      .pipe(tap((product) => this.updateProductCache(product)));
+  }
+
   public updateProductCache(product: Product): void {
     const productId = product.id;
 
@@ -87,6 +113,6 @@ export class ProductsService {
       );
     });
 
-    console.log('cache actualizado');
+    console.log('Cache actualizado');
   }
 }

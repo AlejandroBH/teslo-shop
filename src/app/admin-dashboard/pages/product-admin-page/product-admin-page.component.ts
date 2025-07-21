@@ -2,6 +2,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Component, effect, inject } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+
 import { ProductsService } from '@products/services/products.service';
 import { ProductDetailsComponent } from './product-details/product-details.component';
 

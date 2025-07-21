@@ -1,8 +1,11 @@
 import { ProductsService } from '@products/services/products.service';
-import { Component, inject, input, OnInit } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+
 import { Product } from '@products/interfaces/product.interface';
 import { ProductCarouselComponent } from '@products/components/product-carousel/product-carousel.component';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormUtils } from '@utils/forms-utils';
 import { FormErrorLabelComponent } from '@shared/components/form-error-label/form-error-label.component';
 
@@ -17,8 +20,12 @@ import { FormErrorLabelComponent } from '@shared/components/form-error-label/for
 })
 export class ProductDetailsComponent implements OnInit {
   public product = input.required<Product>();
+
+  private router = inject(Router);
   private fb = inject(FormBuilder);
+
   private productsService = inject(ProductsService);
+  public wasSaved = signal(false);
 
   public productForm = this.fb.group({
     title: ['', Validators.required],
@@ -62,7 +69,7 @@ export class ProductDetailsComponent implements OnInit {
     this.productForm.patchValue({ sizes: currentSizes });
   }
 
-  public onSubmit() {
+  public async onSubmit() {
     const isValid = this.productForm.valid;
     this.productForm.markAllAsTouched();
 
@@ -78,10 +85,21 @@ export class ProductDetailsComponent implements OnInit {
           .map((tag) => tag.trim()) ?? [],
     };
 
-    this.productsService
-      .updateProduct(this.product().id, productLike)
-      .subscribe((product) => {
-        console.log('Product updated:', product);
-      });
+    if (this.product().id === 'new') {
+      // crear producto
+      const product = await firstValueFrom(
+        this.productsService.createProduct(productLike)
+      );
+
+      this.router.navigate(['/admin/products', product.id]);
+    } else {
+      // actualizar producto
+      await firstValueFrom(
+        this.productsService.updateProduct(this.product().id, productLike)
+      );
+    }
+
+    this.wasSaved.set(true);
+    setTimeout(() => this.wasSaved.set(false), 3000);
   }
 }
