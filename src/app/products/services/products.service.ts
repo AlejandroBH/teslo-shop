@@ -153,9 +153,10 @@ export class ProductsService {
       this.uploadImage(imageFile)
     );
 
-    return forkJoin(uploadObservables).pipe(
-      tap((imagesNames) => console.log({ imagesNames }))
-    );
+    return forkJoin(uploadObservables)
+      .pipe
+      // tap((imagesNames) => console.log({ imagesNames }))
+      ();
   }
 
   public uploadImage(imageFile: File): Observable<string> {
